@@ -112,7 +112,8 @@ class LilPGP:
 
     def export_key(self):
         selected_key = self.key_listbox.get(tk.ANCHOR)
-        ascii_armored_public_keys = self.gpg.export_keys(selected_key)
+        ascii_armored_public_keys = self.gpg.export_keys(selected_key)        
+      
         file_path = filedialog.asksaveasfilename(defaultextension=".asc")
         if file_path:
             with open(file_path, 'w') as f:
@@ -139,9 +140,11 @@ class LilPGP:
         public_key_file = self.public_key_entry.get()
         directory = self.directory_entry.get()
 
-        script_dir = os.path.dirname(os.path.realpath(__file__))
+        script_dir = os.path.expanduser('~/Documents/LilPGP')
+        if not os.path.isdir(script_dir):
+            os.mkdir(script_dir)
+            
         encrypted_dir = os.path.join(script_dir, 'encrypted')
-
         if not os.path.isdir(encrypted_dir):
             os.mkdir(encrypted_dir)
 
@@ -167,14 +170,17 @@ class LilPGP:
                 self.display_message(f"Encryption of {filename} failed: {status.status}")
 
     def decrypt_directory(self):
-        selected_key = self.key_listbox.get(tk.ANCHOR)[0]
+        selected_key = self.key_listbox.get(tk.ANCHOR)
         directory = self.directory_entry.get()
 
-        script_dir = os.path.dirname(os.path.realpath(__file__))
+        script_dir = os.path.expanduser('~/Documents/LilPGP')
+        if not os.path.isdir(script_dir):
+            os.mkdir(script_dir)
+            
         decrypted_dir = os.path.join(script_dir, 'decrypted')
-
         if not os.path.isdir(decrypted_dir):
             os.mkdir(decrypted_dir)
+
         for filename in os.listdir(directory):
             with open(os.path.join(directory, filename), 'rb') as f:
                 status = self.gpg.decrypt_file(
