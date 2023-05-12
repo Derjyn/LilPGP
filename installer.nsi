@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "LilPGP"
-!define PRODUCT_VERSION "1.0"
+!define PRODUCT_VERSION "v0.0.2-alpha"
 !define PRODUCT_PUBLISHER "Derjyn"
 !define PRODUCT_WEB_SITE "https://github.com/Derjyn"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -53,15 +53,20 @@ Section "MainSection" SEC01
   File "dependencies\python-3.11.3-amd64.exe"
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  File "LilPGP.py"
+  File "LilPGP.exe"
   CreateDirectory "$SMPROGRAMS\LilPGP"
-  CreateShortCut "$SMPROGRAMS\LilPGP\LilPGP.lnk" "$INSTDIR\LilPGP.py"
-  CreateShortCut "$DESKTOP\LilPGP.lnk" "python" "$\"$INSTDIR\LilPGP.py$\""
+  CreateShortCut "$SMPROGRAMS\LilPGP\LilPGP.lnk" "$INSTDIR\LilPGP.exe"
+  CreateShortCut "$DESKTOP\LilPGP.lnk" "$INSTDIR\LilPGP.exe"
+  ShellLink::SetRunAsAdministrator "$SMPROGRAMS\LilPGP\LilPGP.lnk"
+  ShellLink::SetRunAsAdministrator "$DESKTOP\LilPGP.lnk"
 SectionEnd
 
 Section "Silent Installs" SEC02
   ExecWait '"$INSTDIR\dependencies\python-3.11.3-amd64.exe" /quiet InstallAllUsers=1 PrependPath=1'
+  Delete "$INSTDIR\dependencies\python-3.11.3-amd64.exe"
   ExecWait '"$INSTDIR\dependencies\gpg4win-4.1.0.exe" /S'
+  Delete "$INSTDIR\dependencies\gpg4win-4.1.0.exe"
+  RMDir "$INSTDIR\dependencies"
   nsExec::ExecToStack  'cmd /c "pip install -U python-gnupg"'
 SectionEnd
 
@@ -90,7 +95,7 @@ FunctionEnd
 
 Section Uninstall
   Delete "$INSTDIR\uninst.exe"
-  Delete "$INSTDIR\LilPGP.py"
+  Delete "$INSTDIR\LilPGP.exe"
   Delete "$INSTDIR\dependencies\python-3.11.3-amd64.exe"
   Delete "$INSTDIR\dependencies\gpg4win-4.1.0.exe"
   Delete "$INSTDIR\test_dir\test_file_c.txt"
